@@ -90,8 +90,8 @@ window.COURSE = {
   ]
 };
 
-// สไลด์: ยังไม่เปิดให้อ่านบนเว็บ (ready: false) — จะเพิ่มภาพแต่ละหน้าที่ slides/chXX/p-NN.jpg ภายหลัง
-window.SLIDES_READY = false;
+// สไลด์: PDF อยู่ที่ slides/chXX.pdf, ภาพแต่ละหน้า slides/chXX/p-NN.jpg (กว้าง 1440px), ภาพปก slides/chXX/thumb.jpg
+window.SLIDES_READY = true;
 window.SLIDES = [
   { id: "00", title: "แนะนำรายวิชา", en: "Course Introduction", pages: 22, weeks: "สัปดาห์ 1" },
   { id: "01", title: "ภาษา ไวยากรณ์ และเครื่องจักร", en: "Languages, Grammars & Machines", pages: 37, weeks: "สัปดาห์ 1" },

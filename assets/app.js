@@ -3,11 +3,16 @@
   const app = document.getElementById("app");
   const pad = (n) => String(n).padStart(2, "0");
   const slideById = (id) => S.find((s) => s.id === id);
+  const pageSrc = (id, p) => `slides/ch${id}/p-${pad(p)}.jpg`;
   const seg = (cls = "") => `<div class="seg-bar ${cls}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>`;
   const icon = {
     slides: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg>',
     doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>',
     pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+    full: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+    left: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    right: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 4h12l-2 4 2 4H4"/></svg>'
   };
 
@@ -205,6 +210,131 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
       </div>`;
   }
 
+  /* ---------------- รายการสไลด์ ---------------- */
+  function renderSlideList() {
+    const total = S.reduce((a, s) => a + s.pages, 0);
+    const cards = S.map((s) => `
+      <a class="deck" href="#slides/${s.id}">
+        <div class="thumb"><img src="slides/ch${s.id}/thumb.jpg" alt="หน้าปกบทที่ ${parseInt(s.id, 10)}" loading="lazy"></div>
+        <div class="body">
+          <div class="ch">บทที่ ${parseInt(s.id, 10)}</div>
+          <div class="tt">${s.title}</div>
+          <div class="en">${s.en}</div>
+          <div class="foot"><span>${s.weeks}</span><span>${s.pages} หน้า</span></div>
+        </div>
+      </a>`).join("");
+    app.innerHTML = `
+      <div class="page">
+        <section class="hero">
+          <div class="eyebrow"><b>สไลด์ประกอบการเรียน</b> · ${C.code} · ${C.term}</div>
+          <h1>สไลด์รายบท</h1>
+          <p class="en">${S.length} บท · ${total} หน้า — เปิดอ่านบนเว็บได้ทันที หรือดาวน์โหลดเป็น PDF</p>
+          ${seg()}
+        </section>
+        <div class="slide-grid">${cards}</div>
+      </div>`;
+  }
+
+  /* ---------------- ตัวอ่านสไลด์ ---------------- */
+  let viewer = null;
+  function renderViewer(id, page) {
+    const s = slideById(id);
+    if (!s) return renderSlideList();
+    const idx = S.indexOf(s);
+    const prev = S[idx - 1], next = S[idx + 1];
+    page = Math.min(Math.max(1, page || 1), s.pages);
+
+    const strip = Array.from({ length: s.pages }, (_, i) => `
+      <button type="button" data-p="${i + 1}" aria-label="หน้า ${i + 1}"><img src="${pageSrc(id, i + 1)}" alt="" loading="lazy"><span class="pn">${i + 1}</span></button>`).join("");
+
+    app.innerHTML = `
+      <div class="page viewer">
+        <div class="viewer-top">
+          <div>
+            <a class="back" href="#slides">${icon.left} สไลด์ทั้งหมด</a>
+            <div class="viewer-title"><div class="ch">บทที่ ${parseInt(id, 10)} · ${s.weeks}</div><h1>${s.title}</h1></div>
+          </div>
+          <div class="btns">
+            <button class="btn" type="button" id="fs">${icon.full}เต็มจอ</button>
+            <a class="btn primary" href="slides/ch${id}.pdf" download>${icon.dl}ดาวน์โหลด PDF</a>
+          </div>
+        </div>
+
+        <div class="stage" id="stage">
+          <div class="frame"><img id="slideImg" alt=""></div>
+          <button class="nav-zone prev" id="zPrev" type="button" aria-label="หน้าก่อนหน้า"><span>${icon.left}</span></button>
+          <button class="nav-zone next" id="zNext" type="button" aria-label="หน้าถัดไป"><span>${icon.right}</span></button>
+        </div>
+        <div class="progress"><i id="bar"></i></div>
+
+        <div class="controls">
+          <button class="btn" type="button" id="bPrev" aria-label="หน้าก่อนหน้า">${icon.left}</button>
+          <span class="count" id="count"></span>
+          <button class="btn" type="button" id="bNext" aria-label="หน้าถัดไป">${icon.right}</button>
+        </div>
+        <div class="strip" id="strip">${strip}</div>
+        <div class="hint">ใช้ปุ่มลูกศร ← → บนคีย์บอร์ด หรือปัดซ้าย/ขวาบนมือถือเพื่อเปลี่ยนหน้า</div>
+
+        <nav class="pager">
+          ${prev ? `<a href="#slides/${prev.id}"><div class="lbl">← บทก่อนหน้า</div><div class="nm">บทที่ ${parseInt(prev.id, 10)} ${prev.title}</div></a>` : "<span></span>"}
+          ${next ? `<a class="r" href="#slides/${next.id}"><div class="lbl">บทถัดไป →</div><div class="nm">บทที่ ${parseInt(next.id, 10)} ${next.title}</div></a>` : "<span></span>"}
+        </nav>
+      </div>`;
+
+    viewer = { s, page };
+    const img = document.getElementById("slideImg");
+    const stripEl = document.getElementById("strip");
+
+    function show(p, push = true) {
+      p = Math.min(Math.max(1, p), s.pages);
+      viewer.page = p;
+      img.src = pageSrc(id, p);
+      img.alt = `${s.title} หน้า ${p}`;
+      document.getElementById("count").innerHTML = `<b>${p}</b> / ${s.pages}`;
+      document.getElementById("bar").style.width = (p / s.pages * 100) + "%";
+      ["zPrev", "bPrev"].forEach((k) => document.getElementById(k).disabled = p === 1);
+      ["zNext", "bNext"].forEach((k) => document.getElementById(k).disabled = p === s.pages);
+      stripEl.querySelectorAll("button").forEach((b) => b.classList.toggle("on", +b.dataset.p === p));
+      const on = stripEl.querySelector(`button[data-p="${p}"]`);
+      if (on) stripEl.scrollTo({ left: on.offsetLeft - stripEl.clientWidth / 2 + on.clientWidth / 2, behavior: "smooth" });
+      // preload neighbours
+      [p + 1, p - 1].forEach((q) => { if (q >= 1 && q <= s.pages) new Image().src = pageSrc(id, q); });
+      if (push) history.replaceState(null, "", `#slides/${id}/${p}`);
+    }
+    viewer.show = show;
+
+    document.getElementById("zPrev").onclick = document.getElementById("bPrev").onclick = () => show(viewer.page - 1);
+    document.getElementById("zNext").onclick = document.getElementById("bNext").onclick = () => show(viewer.page + 1);
+    stripEl.onclick = (e) => { const b = e.target.closest("button"); if (b) show(+b.dataset.p); };
+
+    const stage = document.getElementById("stage");
+    document.getElementById("fs").onclick = () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (stage.requestFullscreen) stage.requestFullscreen();
+      else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
+      else window.open(pageSrc(id, viewer.page), "_blank");
+    };
+
+    let x0 = null;
+    stage.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener("touchend", (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 45) show(viewer.page + (dx < 0 ? 1 : -1));
+    });
+
+    show(page, false);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (!viewer || !document.getElementById("slideImg")) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); viewer.show(viewer.page + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); viewer.show(viewer.page - 1); }
+    else if (e.key === "Home") viewer.show(1);
+    else if (e.key === "End") viewer.show(viewer.s.pages);
+  });
+
+
   /* ---------------- หน้าที่ยังไม่เปิด ---------------- */
   const SOON = {
     slides: { ic: icon.slides, title: "สไลด์ประกอบการเรียน", en: "Lecture Slides", text: `สไลด์ ${S.length} บท (${S.reduce((a, s) => a + s.pages, 0)} หน้า) จะเปิดให้อ่านบนเว็บและดาวน์โหลดเป็น PDF เร็ว ๆ นี้`, list: true },
@@ -230,6 +360,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
 
   /* ---------------- router ---------------- */
   const TABS = ["plan", "slides", "lectures", "exercises"];
+  let lastRoute = "";
   function route() {
     const parts = (location.hash.replace(/^#\/?/, "") || "home").split("/");
     const tab = TABS.includes(parts[0]) ? parts[0] : "home";
@@ -239,6 +370,10 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
       t.setAttribute("aria-selected", on);
     });
 
+    const key = parts.slice(0, 2).join("/");
+    if (tab === "slides" && READY && parts[1] && key === lastRoute && viewer) { viewer.show(+parts[2] || 1, false); return; }
+    lastRoute = key;
+    viewer = null;
     if (window.__heroUnmount) { window.__heroUnmount(); window.__heroUnmount = null; }
     window.__heroPending = null;
     app.className = tab === "home" ? "" : "wrap";
@@ -246,6 +381,11 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
 
     if (tab === "home") { renderHome(); document.title = `${C.code} ${C.nameTh} (${C.nameEn})`; }
     else if (tab === "plan") { renderPlan(); document.title = `แผนการสอน · ${C.code} ${C.nameTh}`; }
+    else if (tab === "slides" && READY) {
+      const s = parts[1] && slideById(parts[1]);
+      if (s) { renderViewer(s.id, +parts[2] || 1); document.title = `บทที่ ${parseInt(s.id, 10)} ${s.title} · ${C.code}`; }
+      else { renderSlideList(); document.title = `สไลด์ · ${C.code}`; }
+    }
     else { renderSoon(tab); document.title = `${SOON[tab].title} · ${C.code}`; }
     window.scrollTo({ top: 0, behavior: "instant" });
   }
