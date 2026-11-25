@@ -18,7 +18,7 @@ assets/vendor/      Three.js r185 (three.module.min.js, three.core.min.js, addon
 
 ## สถานะ
 - [x] หน้าแรก, แผนการสอน
-- [x] สไลด์ 12 บท (#slides, #slides/04, #slides/04/7)
+- [x] สไลด์ 11 บท (บทที่ 1–11) (#slides, #slides/04, #slides/04/7)
 
 ## เพิ่ม/แก้สไลด์บท
 ```bash

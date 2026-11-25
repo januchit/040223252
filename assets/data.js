@@ -46,7 +46,7 @@ window.COURSE = {
 
   // ch = รหัสบทของสไลด์ที่เกี่ยวข้อง (ตรงกับ SLIDES ด้านล่าง), quiz = มีทดสอบย่อยในสัปดาห์นั้น
   weeks: [
-    { w: 1,  title: "Introduction to Languages, Grammars and Machines", th: "แนวคิดของภาษารูปนัย ไวยากรณ์ และเครื่องจักร ภาพรวมของทฤษฎีการคำนวณ", clo: 1, ch: ["00", "01"] },
+    { w: 1,  title: "Introduction to Languages, Grammars and Machines", th: "แนวคิดของภาษารูปนัย ไวยากรณ์ และเครื่องจักร ภาพรวมของทฤษฎีการคำนวณ", clo: 1, ch: ["01"] },
     { w: 2,  title: "Mathematical Tools and Techniques (Relations, Functions and Recursive)", th: "เซต ความสัมพันธ์ ฟังก์ชัน และการนิยามแบบเวียนเกิด", clo: 1, ch: [] },
     { w: 3,  title: "Methods of Proof & Mathematical Induction", th: "วิธีการพิสูจน์ การพิสูจน์โดยอุปนัยเชิงคณิตศาสตร์ และอุปนัยเชิงโครงสร้าง", clo: 1, ch: [] },
     { w: 4,  title: "Language, Recursively defining Languages", th: "สตริงและภาษา การดำเนินการบนภาษา การนิยามภาษาแบบเวียนเกิด", clo: 1, ch: ["02"] },
@@ -93,7 +93,6 @@ window.COURSE = {
 // สไลด์: PDF อยู่ที่ slides/chXX.pdf, ภาพแต่ละหน้า slides/chXX/p-NN.jpg (กว้าง 1440px), ภาพปก slides/chXX/thumb.jpg
 window.SLIDES_READY = true;
 window.SLIDES = [
-  { id: "00", title: "แนะนำรายวิชา", en: "Course Introduction", pages: 22, weeks: "สัปดาห์ 1" },
   { id: "01", title: "ภาษา ไวยากรณ์ และเครื่องจักร", en: "Languages, Grammars & Machines", pages: 37, weeks: "สัปดาห์ 1" },
   { id: "02", title: "ภาษาและออโตมาตาจำกัด", en: "Languages & Finite Automata", pages: 67, weeks: "สัปดาห์ 4–5" },
   { id: "03", title: "ออโตมาตาจำกัดแบบไม่เชิงกำหนด (NFA)", en: "Nondeterministic Finite Automata", pages: 57, weeks: "สัปดาห์ 5" },
