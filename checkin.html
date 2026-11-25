@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>เช็คชื่อ · 040223252 ทฤษฎีการคำนวณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --blue: #2F5BEA; --blue-dark: #1E3FB0; --ink: #1A1A1A; --gray: #6B6B6B; --line: #E6E6E6; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: "IBM Plex Sans Thai", system-ui, sans-serif; color: var(--ink); background: #F6F7FB; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; background: #fff; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+  .logo { width: 42px; height: 42px; border-radius: 10px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 700; }
+  .brand b { color: var(--blue); }
+  .brand small { display: block; color: var(--gray); font-size: 13px; }
+  .clock { font-variant-numeric: tabular-nums; text-align: right; }
+  .clock .t { font-size: 30px; font-weight: 600; letter-spacing: .5px; }
+  .clock .d { font-size: 14px; color: var(--gray); }
+  main { flex: 1; display: grid; place-items: center; padding: 28px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 40px rgba(20,40,120,.08); padding: 36px 44px; text-align: center; width: min(760px, 100%); }
+  .eyebrow { color: var(--blue); font-weight: 600; font-size: 15px; letter-spacing: .3px; }
+  h1 { margin: 6px 0 4px; font-size: clamp(26px, 4vw, 40px); }
+  .sub { color: var(--gray); font-size: 17px; }
+  .qr { margin: 26px auto 18px; width: min(62vh, 100%); aspect-ratio: 1; background: #fff; padding: 14px; border: 1px solid var(--line); border-radius: 12px; }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .remain { font-size: 18px; }
+  .remain b { color: var(--blue); font-variant-numeric: tabular-nums; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 14px auto 0; width: min(420px, 100%); }
+  .bar i { display: block; height: 100%; background: var(--blue); }
+  .closed .icon { width: 84px; height: 84px; margin: 6px auto 14px; border-radius: 50%; background: #EEF2FF; color: var(--blue); display: grid; place-items: center; }
+  .next { margin-top: 18px; padding: 14px 18px; background: #F6F7FB; border-radius: 12px; font-size: 16px; }
+  .note { margin-top: 18px; color: var(--gray); font-size: 13.5px; }
+  .btn { font: inherit; font-size: 14px; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .btn:hover { border-color: var(--blue); color: var(--blue); }
+  @media (max-width: 640px) { header { padding: 12px 16px; } .brand small { display: none; } .clock .t { font-size: 22px; } .card { padding: 26px 18px; } main { padding: 14px; } }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="./"><span class="logo">Σ*</span><span><b>040223252</b> เช็คชื่อ<small>ทฤษฎีการคำนวณ · Theory of Computation</small></span></a>
+  <div class="clock"><div class="t" id="clk">--:--:--</div><div class="d" id="day"></div></div>
+</header>
+<main><div class="card" id="card"></div></main>
+
+<script src="assets/vendor/qrcode.js"></script>
+<script src="assets/checkin-config.js?v=1"></script>
+<script>
+(function () {
+  const C = window.CHECKIN, TZ = C.timeZone;
+  const DAYS = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+  const MONTHS = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+  const card = document.getElementById("card");
+
+  // เวลาไทยเสมอ ไม่ขึ้นกับการตั้งเวลาของเครื่อง
+  function parts(d) {
+    const f = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", weekday: "short", hourCycle: "h23" })
+      .formatToParts(d).reduce((a, x) => (a[x.type] = x.value, a), {});
+    const wd = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[f.weekday];
+    return { ymd: `${f.year}-${f.month}-${f.day}`, y: +f.year, m: +f.month, d: +f.day, hm: `${f.hour}:${f.minute}`, hms: `${f.hour}:${f.minute}:${f.second}`, wd };
+  }
+  const toMin = (hm) => { const [h, m] = hm.split(":").map(Number); return h * 60 + m; };
+  const isClassDate = (ymd) => !(C.termStart && ymd < C.termStart) && !(C.termEnd && ymd > C.termEnd) && C.skipDates.indexOf(ymd) < 0;
+  const thaiDate = (p) => `วัน${DAYS[p.wd]}ที่ ${p.d} ${MONTHS[p.m - 1]} ${p.y + 543}`;
+
+  function current(p) {
+    if (!isClassDate(p.ymd)) return null;
+    return C.sections.find((s) => s.day === p.wd && p.hm >= s.start && p.hm < s.end) || null;
+  }
+  function nextClass(now) {
+    for (let k = 0; k < 400; k++) {
+      const d = new Date(now.getTime() + k * 864e5), p = parts(d);
+      if (!isClassDate(p.ymd)) continue;
+      const list = C.sections.filter((s) => s.day === p.wd && (k > 0 || s.start > parts(now).hm)).sort((a, b) => a.start < b.start ? -1 : 1);
+      if (list.length) return { p, s: list[0], k };
+    }
+    return null;
+  }
+
+  function qrSvg(text) {
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    const n = q.getModuleCount(), m = 2; let path = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) path += `M${c + m},${r + m}h1v1h-1z`;
+    return `<svg viewBox="0 0 ${n + 2 * m} ${n + 2 * m}" shape-rendering="crispEdges" role="img" aria-label="QR Code เช็คชื่อ"><rect width="100%" height="100%" fill="#fff"/><path d="${path}" fill="#111"/></svg>`;
+  }
+
+  let shown = "";
+  function render() {
+    const now = new Date(), p = parts(now);
+    document.getElementById("clk").textContent = p.hms;
+    document.getElementById("day").textContent = thaiDate(p);
+    const s = current(p);
+    const key = s ? "open-" + s.sec : "closed-" + p.ymd + "-" + p.hm.slice(0, 4);
+
+    if (s) {
+      const left = toMin(s.end) - toMin(p.hm), total = toMin(s.end) - toMin(s.start);
+      if (shown !== key) {
+        shown = key;
+        card.className = "card";
+        card.innerHTML = s.formUrl
+          ? `<div class="eyebrow">กำลังเปิดเช็คชื่อ · ห้อง ${s.room}</div>
+             <h1>ตอนเรียน ${s.sec}</h1>
+             <div class="sub">พฤหัสบดี ${s.start}–${s.end} น. · สแกนด้วยมือถือ แล้วลงชื่อเข้าใช้ด้วยบัญชีมหาวิทยาลัย</div>
+             <div class="qr">${qrSvg(s.formUrl)}</div>
+             <div class="remain">ปิดรับในอีก <b id="left"></b></div>
+             <div class="bar"><i id="bar"></i></div>
+             <div class="note">กรอกชื่อ-นามสกุล และรหัสนักศึกษา ระบบบันทึกเวลาที่กรอกโดยอัตโนมัติ<br><button class="btn" id="fs" type="button">เต็มจอ</button></div>`
+          : `<div class="eyebrow">ตอนเรียน ${s.sec}</div><h1>ยังไม่ได้ตั้งค่าลิงก์ฟอร์ม</h1><div class="sub">ใส่ formUrl ในไฟล์ assets/checkin-config.js</div>`;
+        const fs = document.getElementById("fs");
+        if (fs) fs.onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+      }
+      const l = document.getElementById("left");
+      if (l) { l.textContent = left >= 60 ? `${Math.floor(left / 60)} ชม. ${left % 60} นาที` : `${left} นาที`; document.getElementById("bar").style.width = (left / total * 100) + "%"; }
+      return;
+    }
+
+    if (shown === key) return;
+    shown = key;
+    const n = nextClass(now);
+    const when = n ? (n.k === 0 ? "วันนี้" : n.k === 1 ? "พรุ่งนี้" : thaiDate(n.p)) : "";
+    card.className = "card closed";
+    card.innerHTML = `
+      <div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <div class="eyebrow">040223252 ทฤษฎีการคำนวณ</div>
+      <h1>ไม่อยู่ในช่วงเวลาเรียน</h1>
+      <div class="sub">QR Code สำหรับเช็คชื่อจะแสดงเฉพาะในช่วงเวลาเรียนเท่านั้น</div>
+      ${n ? `<div class="next">คาบถัดไป: <b>ตอนเรียน ${n.s.sec}</b> · ${when} เวลา ${n.s.start}–${n.s.end} น. ห้อง ${n.s.room}</div>` : ""}
+      <div class="note">ตอนเรียน 1: พฤหัสบดี 09.00–12.00 น. · ตอนเรียน 2: พฤหัสบดี 13.00–16.00 น.</div>`;
+  }
+  render();
+  setInterval(render, 1000);
+})();
+</script>
+</body>
+</html>
