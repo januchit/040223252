@@ -1,5 +1,8 @@
 (function () {
   const C = window.COURSE, S = window.SLIDES || [], READY = !!window.SLIDES_READY;
+  const LEC = (window.LECTURES || []).map((d) => Object.assign({}, (window.SLIDES || []).find((s) => s.id === d.id) || {}, d));
+  const lecById = (id) => LEC.find((d) => d.id === id);
+  const lecSrc = (id, p) => `lectures/ch${id}/p-${pad(p)}.jpg`;
   const app = document.getElementById("app");
   const pad = (n) => String(n).padStart(2, "0");
   const slideById = (id) => S.find((s) => s.id === id);
@@ -70,11 +73,11 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
           <p>อ่านสไลด์รายบทบนเว็บได้ทันที ทั้งบนคอมพิวเตอร์และมือถือ หรือดาวน์โหลดเป็น PDF</p>
           <span class="go">${READY ? "เปิดดู →" : "เร็ว ๆ นี้"}</span>
         </a>
-        <a class="hcard soon" href="#lectures">
+        <a class="hcard${LEC.length ? "" : " soon"}" href="#lectures">
           <span class="hnum">03</span>
           <h3>คำบรรยายรายวิชา</h3>
-          <p>เนื้อหาคำบรรยายละเอียดรายบท พร้อมนิยาม ทฤษฎีบท และตัวอย่าง อ่านทบทวนได้ทุกที่</p>
-          <span class="go">เร็ว ๆ นี้</span>
+          <p>เอกสารประกอบการสอนรายบท พร้อมนิยาม ทฤษฎีบท ตัวอย่าง และแบบฝึกหัด อ่านบนเว็บหรือดาวน์โหลดเป็น PDF</p>
+          <span class="go">${LEC.length ? "เปิดดู →" : "เร็ว ๆ นี้"}</span>
         </a>
         <a class="hcard soon" href="#exercises">
           <span class="hnum">04</span>
@@ -112,12 +115,13 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
           ? `<a class="chip" href="#slides/${id}" title="${s.title}">${icon.slides}บทที่ ${n}</a>`
           : `<span class="chip ch" title="สไลด์บทที่ ${n}: ${s.title}">${icon.slides}บทที่ ${n}</span>`;
       }).join("");
+      const docs = w.ch.filter((id) => lecById(id)).map((id) => `<a class="chip" href="#lectures/${id}" title="คำบรรยายบทที่ ${parseInt(id, 10)}">${icon.doc}คำบรรยาย ${parseInt(id, 10)}</a>`).join("");
       const quiz = w.quiz ? `<span class="chip quiz">${icon.flag}${w.quiz}</span>` : "";
       return `
         <div class="wk">
           <div class="no">สัปดาห์<b>${w.w}</b></div>
           <div><div class="t">${w.title}</div><div class="th">${w.th}</div></div>
-          <div class="links">${quiz}<span class="chip clo-chip">CLO ${w.clo}</span>${chips}</div>
+          <div class="links">${quiz}<span class="chip clo-chip">CLO ${w.clo}</span>${chips}${docs}</div>
         </div>`;
     }).join("");
 
@@ -335,6 +339,105 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
   });
 
 
+  /* ---------------- คำบรรยายรายวิชา : รายการบท ---------------- */
+  function renderLectureList() {
+    const total = LEC.reduce((a, d) => a + d.pages, 0);
+    const cards = LEC.map((d) => `
+      <a class="doccard" href="#lectures/${d.id}">
+        <div class="dthumb"><img src="lectures/ch${d.id}/thumb.jpg" alt="หน้าแรกของบทที่ ${parseInt(d.id, 10)}" loading="lazy"></div>
+        <div class="body">
+          <div class="ch">บทที่ ${parseInt(d.id, 10)}</div>
+          <div class="tt">${d.title || ""}</div>
+          <div class="en">${d.en || ""}</div>
+          <div class="foot"><span>${d.weeks || ""}</span><span>${d.pages} หน้า · PDF</span></div>
+        </div>
+      </a>`).join("");
+    app.innerHTML = `
+      <div class="page">
+        <section class="hero">
+          <div class="eyebrow"><b>คำบรรยายรายวิชา</b> · ${C.code} · ${C.term}</div>
+          <h1>เอกสารประกอบการสอน</h1>
+          <p class="en">${LEC.length} บท · ${total} หน้า — นิยาม ทฤษฎีบท ตัวอย่าง สรุปท้ายบท แบบฝึกหัดและแนวคำตอบ อ่านบนเว็บได้ทันที หรือดาวน์โหลดเป็น PDF</p>
+          ${seg()}
+        </section>
+        <div class="doc-grid">${cards}</div>
+      </div>`;
+  }
+
+  /* ---------------- คำบรรยายรายวิชา : ตัวอ่านเอกสาร (เลื่อนอ่านต่อเนื่อง) ---------------- */
+  let reader = null;
+  function renderReader(id, page) {
+    const d = lecById(id);
+    if (!d) return renderLectureList();
+    const idx = LEC.indexOf(d), prev = LEC[idx - 1], next = LEC[idx + 1];
+    page = Math.min(Math.max(1, page || 1), d.pages);
+    const sheets = Array.from({ length: d.pages }, (_, i) => `
+      <div class="sheet" id="pg${i + 1}" data-p="${i + 1}"><img src="${lecSrc(id, i + 1)}" alt="${d.title} หน้า ${i + 1}" loading="lazy"></div>`).join("");
+    app.innerHTML = `
+      <div class="page viewer">
+        <div class="viewer-top">
+          <div>
+            <a class="back" href="#lectures">${icon.left} คำบรรยายทั้งหมด</a>
+            <div class="viewer-title"><div class="ch">บทที่ ${parseInt(id, 10)}${d.weeks ? " · " + d.weeks : ""}</div><h1>${d.title || ""}</h1></div>
+          </div>
+          <div class="btns">
+            ${READY && slideById(id) ? `<a class="btn" href="#slides/${id}">${icon.slides}สไลด์บทนี้</a>` : ""}
+            <a class="btn primary" href="lectures/ch${id}.pdf" download>${icon.dl}ดาวน์โหลด PDF</a>
+          </div>
+        </div>
+        <div class="rbar">
+          <div class="rbar-inner">
+            <button class="btn sm" type="button" id="rPrev" aria-label="หน้าก่อนหน้า">${icon.left}</button>
+            <label class="pgjump">หน้า <input id="rPg" type="number" min="1" max="${d.pages}" value="${page}" inputmode="numeric"> / ${d.pages}</label>
+            <button class="btn sm" type="button" id="rNext" aria-label="หน้าถัดไป">${icon.right}</button>
+            <span class="sp"></span>
+            <button class="btn sm" type="button" id="zOut" aria-label="ย่อ">−</button>
+            <span class="zoomv" id="zv">100%</span>
+            <button class="btn sm" type="button" id="zIn" aria-label="ขยาย">+</button>
+          </div>
+          <div class="progress"><i id="rbarp"></i></div>
+        </div>
+        <div class="sheets" id="sheets">${sheets}</div>
+        <nav class="pager">
+          ${prev ? `<a href="#lectures/${prev.id}"><div class="lbl">← บทก่อนหน้า</div><div class="nm">บทที่ ${parseInt(prev.id, 10)} ${prev.title || ""}</div></a>` : "<span></span>"}
+          ${next ? `<a class="r" href="#lectures/${next.id}"><div class="lbl">บทถัดไป →</div><div class="nm">บทที่ ${parseInt(next.id, 10)} ${next.title || ""}</div></a>` : "<span></span>"}
+        </nav>
+      </div>`;
+
+    const box = document.getElementById("sheets"), inp = document.getElementById("rPg");
+    let zoom = 1, cur = page;
+    reader = { d, go };
+    function mark(p) {
+      cur = p; inp.value = p;
+      document.getElementById("rbarp").style.width = (p / d.pages * 100) + "%";
+      document.getElementById("rPrev").disabled = p === 1;
+      document.getElementById("rNext").disabled = p === d.pages;
+      history.replaceState(null, "", `#lectures/${id}/${p}`);
+    }
+    function go(p, smooth = true) {
+      p = Math.min(Math.max(1, p), d.pages);
+      const el = document.getElementById("pg" + p);
+      if (el) el.scrollIntoView({ behavior: smooth ? "smooth" : "instant", block: "start" });
+      mark(p);
+    }
+    document.getElementById("rPrev").onclick = () => go(cur - 1);
+    document.getElementById("rNext").onclick = () => go(cur + 1);
+    inp.onchange = () => go(+inp.value || 1);
+    const setZoom = (z) => { zoom = Math.min(2, Math.max(0.6, Math.round(z * 10) / 10)); box.style.setProperty("--zoom", zoom); document.getElementById("zv").textContent = Math.round(zoom * 100) + "%"; };
+    document.getElementById("zIn").onclick = () => { setZoom(zoom + 0.1); go(cur, false); };
+    document.getElementById("zOut").onclick = () => { setZoom(zoom - 0.1); go(cur, false); };
+
+    // ติดตามหน้าที่กำลังอ่าน
+    const io = new IntersectionObserver((ents) => {
+      const vis = ents.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (vis.length) mark(+vis[0].target.dataset.p);
+    }, { rootMargin: "-140px 0px -55% 0px" });
+    box.querySelectorAll(".sheet").forEach((el) => io.observe(el));
+    reader.io = io;
+    mark(page);
+    if (page > 1) setTimeout(() => go(page, false), 60);
+  }
+
   /* ---------------- หน้าที่ยังไม่เปิด ---------------- */
   const SOON = {
     slides: { ic: icon.slides, title: "สไลด์ประกอบการเรียน", en: "Lecture Slides", text: `สไลด์ ${S.length} บท (${S.reduce((a, s) => a + s.pages, 0)} หน้า) จะเปิดให้อ่านบนเว็บและดาวน์โหลดเป็น PDF เร็ว ๆ นี้`, list: true },
@@ -372,8 +475,11 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
 
     const key = parts.slice(0, 2).join("/");
     if (tab === "slides" && READY && parts[1] && key === lastRoute && viewer) { viewer.show(+parts[2] || 1, false); return; }
+    if (tab === "lectures" && parts[1] && key === lastRoute && reader) { if (parts[2]) reader.go(+parts[2], false); return; }
     lastRoute = key;
     viewer = null;
+    if (reader && reader.io) reader.io.disconnect();
+    reader = null;
     if (window.__heroUnmount) { window.__heroUnmount(); window.__heroUnmount = null; }
     window.__heroPending = null;
     app.className = tab === "home" ? "" : "wrap";
@@ -386,8 +492,13 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
       if (s) { renderViewer(s.id, +parts[2] || 1); document.title = `บทที่ ${parseInt(s.id, 10)} ${s.title} · ${C.code}`; }
       else { renderSlideList(); document.title = `สไลด์ · ${C.code}`; }
     }
+    else if (tab === "lectures" && LEC.length) {
+      const d = parts[1] && lecById(parts[1]);
+      if (d) { renderReader(d.id, +parts[2] || 1); document.title = `คำบรรยายบทที่ ${parseInt(d.id, 10)} ${d.title || ""} · ${C.code}`; }
+      else { renderLectureList(); document.title = `คำบรรยายรายวิชา · ${C.code}`; }
+    }
     else { renderSoon(tab); document.title = `${SOON[tab].title} · ${C.code}`; }
-    window.scrollTo({ top: 0, behavior: "instant" });
+    if (!(tab === "lectures" && parts[2] > 1)) window.scrollTo({ top: 0, behavior: "instant" });
   }
   window.addEventListener("hashchange", route);
   route();

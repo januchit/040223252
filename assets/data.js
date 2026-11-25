@@ -106,3 +106,11 @@ window.SLIDES = [
   { id: "10", title: "DPDA และคุณสมบัติของภาษาไม่พึ่งบริบท", en: "DPDA & Properties of CFLs", pages: 28, weeks: "สัปดาห์ 11" },
   { id: "11", title: "เครื่องจักรทัวริง", en: "Turing Machines", pages: 51, weeks: "สัปดาห์ 12–13" }
 ];
+
+// เอกสารประกอบการสอน (คำบรรยาย): PDF อยู่ที่ lectures/chXX.pdf, ภาพแต่ละหน้า lectures/chXX/p-NN.jpg (A4 กว้าง 1241px), ภาพปก lectures/chXX/thumb.jpg
+// ชื่อบทและสัปดาห์ใช้ร่วมกับ SLIDES (id เดียวกัน)
+window.LECTURES = [
+  { id: "01", pages: 20 }, { id: "02", pages: 18 }, { id: "03", pages: 15 }, { id: "04", pages: 14 },
+  { id: "05", pages: 11 }, { id: "06", pages: 10 }, { id: "07", pages: 9 }, { id: "08", pages: 13 },
+  { id: "09", pages: 12 }, { id: "10", pages: 12 }, { id: "11", pages: 12 }
+];

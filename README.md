@@ -30,3 +30,9 @@ pdftoppm -jpeg -jpegopt quality=80 -scale-to-x 560 -scale-to-y -1 -f 1 -l 1 -sin
 แล้วแก้จำนวนหน้า `pages` ใน `SLIDES` ของ `assets/data.js`
 - [ ] คำบรรยายรายวิชา
 - [ ] แบบฝึกหัด
+
+## คำบรรยายรายวิชา (เอกสารประกอบการสอน)
+- PDF รายบทอยู่ที่ `lectures/chXX.pdf` (บทที่ 1–11)
+- ภาพแต่ละหน้า `lectures/chXX/p-NN.jpg` (A4, 150 dpi) และภาพปก `lectures/chXX/thumb.jpg`
+- รายการบทและจำนวนหน้าอยู่ใน `window.LECTURES` ท้ายไฟล์ `assets/data.js` (ชื่อบทและสัปดาห์ดึงจาก `SLIDES` ที่ id ตรงกัน)
+- สร้างภาพใหม่เมื่อแก้ PDF: `pdftoppm -r 150 -jpeg -jpegopt quality=82 lectures/chXX.pdf lectures/chXX/p` แล้วแก้จำนวนหน้าใน `data.js`
