@@ -39,5 +39,6 @@ pdftoppm -jpeg -jpegopt quality=80 -scale-to-x 560 -scale-to-y -1 -f 1 -l 1 -sin
 
 ## หน้าเช็คชื่อ (checkin.html)
 - เปิดที่ `checkin.html` (ไม่มีลิงก์จากเมนู) แสดง QR Code ของฟอร์มเช็คชื่อเฉพาะในช่วงเวลาเรียน (เวลาประเทศไทย)
-- ตั้งค่าตอนเรียน ลิงก์ฟอร์ม วันเปิด-ปิดภาค และวันงดสอนใน `assets/checkin-config.js` (ให้ตรงกับ Apps Script `attendance.gs`)
+- QR เปลี่ยนทุกคาบ: หน้าเว็บขอลิงก์ที่มีรหัสประจำคาบจาก Apps Script Web app (`apiUrl`) ได้เฉพาะในช่วงเวลาเรียน
+- ตั้งค่าตอนเรียน apiUrl วันเปิด-ปิดภาค และวันงดสอนใน `assets/checkin-config.js` (ให้ตรงกับ Apps Script `attendance.gs`)
 - QR สร้างในหน้าเว็บด้วย `assets/vendor/qrcode.js` (qrcode-generator, MIT)

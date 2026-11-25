@@ -47,7 +47,7 @@
 <main><div class="card" id="card"></div></main>
 
 <script src="assets/vendor/qrcode.js"></script>
-<script src="assets/checkin-config.js?v=2"></script>
+<script src="assets/checkin-config.js?v=3"></script>
 <script>
 (function () {
   const C = window.CHECKIN, TZ = C.timeZone;
@@ -87,28 +87,45 @@
     return `<svg viewBox="0 0 ${n + 2 * m} ${n + 2 * m}" shape-rendering="crispEdges" role="img" aria-label="QR Code เช็คชื่อ"><rect width="100%" height="100%" fill="#fff"/><path d="${path}" fill="#111"/></svg>`;
   }
 
+  // ขอลิงก์ QR ประจำคาบจาก Apps Script (Web app) — ได้เฉพาะในช่วงเวลาเรียน
+  const api = { key: "", url: "", at: 0, busy: false, err: false };
+  function fetchLink(s, p) {
+    const key = s.sec + "@" + p.ymd, age = Date.now() - api.at;
+    if (api.busy || (api.key === key && api.url && age < 5 * 60e3) || (api.key === key && !api.url && age < 20e3)) return;
+    api.busy = true;
+    fetch(C.apiUrl + (C.apiUrl.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(), { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => { api.key = key; api.at = Date.now(); api.err = false; api.url = (j.open && j.sec === s.sec) ? j.url : ""; })
+      .catch(() => { api.key = key; api.at = Date.now(); api.err = true; api.url = ""; })
+      .finally(() => { api.busy = false; shown = ""; });
+  }
+
   let shown = "";
   function render() {
     const now = new Date(), p = parts(now);
     document.getElementById("clk").textContent = p.hms;
     document.getElementById("day").textContent = thaiDate(p);
     const s = current(p);
-    const key = s ? "open-" + s.sec : "closed-" + p.ymd + "-" + p.hm.slice(0, 4);
+    if (s && C.apiUrl) fetchLink(s, p);
+    const url = s && api.key === s.sec + "@" + p.ymd ? api.url : "";
+    const key = s ? "open-" + s.sec + "-" + url + "-" + api.err : "closed-" + p.ymd + "-" + p.hm.slice(0, 4);
 
     if (s) {
       const left = toMin(s.end) - toMin(p.hm), total = toMin(s.end) - toMin(s.start);
       if (shown !== key) {
         shown = key;
         card.className = "card";
-        card.innerHTML = s.formUrl
-          ? `<div class="eyebrow">กำลังเปิดเช็คชื่อ · ห้อง ${s.room}</div>
+        card.innerHTML = !C.apiUrl
+          ? `<div class="eyebrow">ตอนเรียน ${s.sec}</div><h1>ยังไม่ได้ตั้งค่า</h1><div class="sub">ใส่ apiUrl (Web app URL ของ Apps Script) ในไฟล์ assets/checkin-config.js</div>`
+          : !url
+          ? `<div class="eyebrow">ตอนเรียน ${s.sec} · ห้อง ${s.room}</div><h1>${api.err ? "เชื่อมต่อระบบเช็คชื่อไม่ได้" : "กำลังเปิดเช็คชื่อ…"}</h1><div class="sub">${api.err ? "ตรวจการเชื่อมต่ออินเทอร์เน็ต ระบบจะลองใหม่อัตโนมัติ" : "กำลังสร้าง QR Code ประจำคาบ รอสักครู่"}</div>`
+          : `<div class="eyebrow">กำลังเปิดเช็คชื่อ · ห้อง ${s.room}</div>
              <h1>ตอนเรียน ${s.sec}</h1>
              <div class="sub">พฤหัสบดี ${s.start}–${s.end} น. · สแกนด้วยมือถือ แล้วลงชื่อเข้าใช้ด้วยบัญชีมหาวิทยาลัย</div>
-             <div class="qr">${qrSvg(s.formUrl)}</div>
+             <div class="qr">${qrSvg(url)}</div>
              <div class="remain">ปิดรับในอีก <b id="left"></b></div>
              <div class="bar"><i id="bar"></i></div>
-             <div class="note">กรอกชื่อ-นามสกุล และรหัสนักศึกษา ระบบบันทึกเวลาที่กรอกโดยอัตโนมัติ<br><button class="btn" id="fs" type="button">เต็มจอ</button></div>`
-          : `<div class="eyebrow">ตอนเรียน ${s.sec}</div><h1>ยังไม่ได้ตั้งค่าลิงก์ฟอร์ม</h1><div class="sub">ใส่ formUrl ในไฟล์ assets/checkin-config.js</div>`;
+             <div class="note">QR นี้ใช้ได้เฉพาะคาบนี้ · กรอกชื่อ-นามสกุล และรหัสนักศึกษา ระบบบันทึกเวลาที่กรอกโดยอัตโนมัติ<br><button class="btn" id="fs" type="button">เต็มจอ</button></div>`;
         const fs = document.getElementById("fs");
         if (fs) fs.onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
       }
