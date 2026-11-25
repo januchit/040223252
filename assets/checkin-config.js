@@ -6,7 +6,7 @@ window.CHECKIN = {
     { sec: 1, day: 4, start: "09:00", end: "12:00", room: "78-1006", formUrl: "" },
     { sec: 2, day: 4, start: "13:00", end: "16:00", room: "78-1006", formUrl: "" }
   ],
-  termStart: "",   // "YYYY-MM-DD" หรือ "" ถ้าไม่จำกัด
-  termEnd: "",
+  termStart: "2026-11-23",   // "YYYY-MM-DD" หรือ "" ถ้าไม่จำกัด
+  termEnd: "2027-03-14",
   skipDates: []    // วันพฤหัสบดีที่งดสอน เช่น ["2027-01-14"]
 };
