@@ -1,6 +1,6 @@
 # 040223252 ทฤษฎีการคำนวณ (Theory of Computation) — 2/2569
 
-เว็บรายวิชาสำหรับนักศึกษา: หน้าแรก (ฉาก 3 มิติ) · แผนการสอน · สไลด์ · คำบรรยายรายวิชา · แบบฝึกหัด
+เว็บรายวิชาสำหรับนักศึกษา: หน้าแรก (ฉาก 3 มิติ) · แผนการสอน · สไลด์ · เอกสารประกอบการสอน · แบบฝึกหัด
 เว็บจริง: https://januchit.github.io/040223252/
 
 ## โครงสร้าง
@@ -28,10 +28,10 @@ pdftoppm -jpeg -jpegopt quality=82 -scale-to-x 1440 -scale-to-y -1 "$f" slides/c
 pdftoppm -jpeg -jpegopt quality=80 -scale-to-x 560 -scale-to-y -1 -f 1 -l 1 -singlefile "$f" slides/ch$n/thumb
 ```
 แล้วแก้จำนวนหน้า `pages` ใน `SLIDES` ของ `assets/data.js`
-- [ ] คำบรรยายรายวิชา
+- [x] เอกสารประกอบการสอน 11 บท (#lectures)
 - [ ] แบบฝึกหัด
 
-## คำบรรยายรายวิชา (เอกสารประกอบการสอน)
+## เอกสารประกอบการสอน (แท็บ #lectures)
 - PDF รายบทอยู่ที่ `lectures/chXX.pdf` (บทที่ 1–11)
 - ภาพแต่ละหน้า `lectures/chXX/p-NN.jpg` (A4, 150 dpi) และภาพปก `lectures/chXX/thumb.jpg`
 - รายการบทและจำนวนหน้าอยู่ใน `window.LECTURES` ท้ายไฟล์ `assets/data.js` (ชื่อบทและสัปดาห์ดึงจาก `SLIDES` ที่ id ตรงกัน)

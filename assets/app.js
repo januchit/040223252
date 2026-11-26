@@ -75,7 +75,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
         </a>
         <a class="hcard${LEC.length ? "" : " soon"}" href="#lectures">
           <span class="hnum">03</span>
-          <h3>คำบรรยายรายวิชา</h3>
+          <h3>เอกสารประกอบการสอน</h3>
           <p>เอกสารประกอบการสอนรายบท พร้อมนิยาม ทฤษฎีบท ตัวอย่าง และแบบฝึกหัด อ่านบนเว็บหรือดาวน์โหลดเป็น PDF</p>
           <span class="go">${LEC.length ? "เปิดดู →" : "เร็ว ๆ นี้"}</span>
         </a>
@@ -115,7 +115,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
           ? `<a class="chip" href="#slides/${id}" title="${s.title}">${icon.slides}บทที่ ${n}</a>`
           : `<span class="chip ch" title="สไลด์บทที่ ${n}: ${s.title}">${icon.slides}บทที่ ${n}</span>`;
       }).join("");
-      const docs = w.ch.filter((id) => lecById(id)).map((id) => `<a class="chip" href="#lectures/${id}" title="คำบรรยายบทที่ ${parseInt(id, 10)}">${icon.doc}คำบรรยาย ${parseInt(id, 10)}</a>`).join("");
+      const docs = w.ch.filter((id) => lecById(id)).map((id) => `<a class="chip" href="#lectures/${id}" title="เอกสารประกอบการสอนบทที่ ${parseInt(id, 10)}">${icon.doc}เอกสาร ${parseInt(id, 10)}</a>`).join("");
       const quiz = w.quiz ? `<span class="chip quiz">${icon.flag}${w.quiz}</span>` : "";
       return `
         <div class="wk">
@@ -339,7 +339,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
   });
 
 
-  /* ---------------- คำบรรยายรายวิชา : รายการบท ---------------- */
+  /* ---------------- เอกสารประกอบการสอน : รายการบท ---------------- */
   function renderLectureList() {
     const total = LEC.reduce((a, d) => a + d.pages, 0);
     const cards = LEC.map((d) => `
@@ -355,7 +355,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
     app.innerHTML = `
       <div class="page">
         <section class="hero">
-          <div class="eyebrow"><b>คำบรรยายรายวิชา</b> · ${C.code} · ${C.term}</div>
+          <div class="eyebrow"><b>Lecture Notes</b> · ${C.code} · ${C.term}</div>
           <h1>เอกสารประกอบการสอน</h1>
           <p class="en">${LEC.length} บท · ${total} หน้า — นิยาม ทฤษฎีบท ตัวอย่าง สรุปท้ายบท แบบฝึกหัดและแนวคำตอบ อ่านบนเว็บได้ทันที หรือดาวน์โหลดเป็น PDF</p>
           ${seg()}
@@ -364,7 +364,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
       </div>`;
   }
 
-  /* ---------------- คำบรรยายรายวิชา : ตัวอ่านเอกสาร (เลื่อนอ่านต่อเนื่อง) ---------------- */
+  /* ---------------- เอกสารประกอบการสอน : ตัวอ่านเอกสาร (เลื่อนอ่านต่อเนื่อง) ---------------- */
   let reader = null;
   function renderReader(id, page) {
     const d = lecById(id);
@@ -377,7 +377,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
       <div class="page viewer">
         <div class="viewer-top">
           <div>
-            <a class="back" href="#lectures">${icon.left} คำบรรยายทั้งหมด</a>
+            <a class="back" href="#lectures">${icon.left} เอกสารประกอบการสอนทั้งหมด</a>
             <div class="viewer-title"><div class="ch">บทที่ ${parseInt(id, 10)}${d.weeks ? " · " + d.weeks : ""}</div><h1>${d.title || ""}</h1></div>
           </div>
           <div class="btns">
@@ -441,7 +441,7 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
   /* ---------------- หน้าที่ยังไม่เปิด ---------------- */
   const SOON = {
     slides: { ic: icon.slides, title: "สไลด์ประกอบการเรียน", en: "Lecture Slides", text: `สไลด์ ${S.length} บท (${S.reduce((a, s) => a + s.pages, 0)} หน้า) จะเปิดให้อ่านบนเว็บและดาวน์โหลดเป็น PDF เร็ว ๆ นี้`, list: true },
-    lectures: { ic: icon.doc, title: "คำบรรยายรายวิชา", en: "Lecture Notes", text: "เนื้อหาคำบรรยายละเอียดรายบท พร้อมนิยาม ทฤษฎีบท ตัวอย่าง และการพิสูจน์ กำลังจัดเตรียม", list: true },
+    lectures: { ic: icon.doc, title: "เอกสารประกอบการสอน", en: "Lecture Notes", text: "เอกสารประกอบการสอนรายบท พร้อมนิยาม ทฤษฎีบท ตัวอย่าง และการพิสูจน์ กำลังจัดเตรียม", list: true },
     exercises: { ic: icon.pen, title: "แบบฝึกหัด", en: "Exercises", text: "แบบฝึกหัดรายบทสำหรับฝึกออกแบบออโตมาตา นิพจน์สม่ำเสมอ ไวยากรณ์ และเครื่องจักรทัวริง กำลังจัดเตรียม", list: false }
   };
   function renderSoon(tab) {
@@ -494,8 +494,8 @@ accepts(<span class="s">"1010"</span>)   <span class="c"># True  (10 = 5·2)</sp
     }
     else if (tab === "lectures" && LEC.length) {
       const d = parts[1] && lecById(parts[1]);
-      if (d) { renderReader(d.id, +parts[2] || 1); document.title = `คำบรรยายบทที่ ${parseInt(d.id, 10)} ${d.title || ""} · ${C.code}`; }
-      else { renderLectureList(); document.title = `คำบรรยายรายวิชา · ${C.code}`; }
+      if (d) { renderReader(d.id, +parts[2] || 1); document.title = `เอกสารประกอบการสอนบทที่ ${parseInt(d.id, 10)} ${d.title || ""} · ${C.code}`; }
+      else { renderLectureList(); document.title = `เอกสารประกอบการสอน · ${C.code}`; }
     }
     else { renderSoon(tab); document.title = `${SOON[tab].title} · ${C.code}`; }
     if (!(tab === "lectures" && parts[2] > 1)) window.scrollTo({ top: 0, behavior: "instant" });
