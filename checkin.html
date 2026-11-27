@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>เช็คชื่อ · 040223252 ทฤษฎีการคำนวณ</title>
+<title>เช็คชื่อ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -41,19 +41,25 @@
 </head>
 <body>
 <header>
-  <a class="brand" href="./"><span class="logo">Σ*</span><span><b>040223252</b> เช็คชื่อ<small>ทฤษฎีการคำนวณ · Theory of Computation</small></span></a>
+  <a class="brand" href="./"><span class="logo">Σ*</span><span><b id="bCode"></b> เช็คชื่อ<small id="bName"></small></span></a>
   <div class="clock"><div class="t" id="clk">--:--:--</div><div class="d" id="day"></div></div>
 </header>
 <main><div class="card" id="card"></div></main>
 
 <script src="assets/vendor/qrcode.js"></script>
-<script src="assets/checkin-config.js?v=5"></script>
+<script src="assets/checkin-config.js?v=6"></script>
 <script>
 (function () {
   const C = window.CHECKIN, TZ = C.timeZone;
   const DAYS = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
   const MONTHS = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
   const card = document.getElementById("card");
+  const COURSE = `${C.courseCode || ""} ${C.courseName || ""}`.trim();
+  document.title = "เช็คชื่อ · " + COURSE;
+  document.getElementById("bCode").textContent = C.courseCode || "";
+  document.getElementById("bName").textContent = [C.courseName, C.courseNameEn].filter(Boolean).join(" · ");
+  const dot = (hm) => hm.replace(":", ".");
+  const SCHEDULE = C.sections.map((x) => `ตอนเรียน ${x.sec}: ${DAYS[x.day]} ${dot(x.start)}–${dot(x.end)} น.`).join(" · ");
 
   // เวลาไทยเสมอ ไม่ขึ้นกับการตั้งเวลาของเครื่อง
   function parts(d) {
@@ -131,12 +137,12 @@
         card.innerHTML = !C.apiUrl
           ? `<div class="eyebrow">ตอนเรียน ${s.sec}</div><h1>ยังไม่ได้ตั้งค่า</h1><div class="sub">ใส่ apiUrl (Web app URL ของ Apps Script) ในไฟล์ assets/checkin-config.js</div>`
           : (!TKEY || api.denied)
-          ? `<div class="eyebrow">ตอนเรียน ${s.sec} · พฤหัสบดี ${s.start}–${s.end} น.</div><h1>QR Code แสดงบนจอในห้องเรียนเท่านั้น</h1><div class="sub">สแกน QR Code จากจอหน้าห้องเรียนเพื่อเช็คชื่อ</div>`
+          ? `<div class="eyebrow">ตอนเรียน ${s.sec} · ${DAYS[s.day]} ${s.start}–${s.end} น.</div><h1>QR Code แสดงบนจอในห้องเรียนเท่านั้น</h1><div class="sub">สแกน QR Code จากจอหน้าห้องเรียนเพื่อเช็คชื่อ</div>`
           : !url
           ? `<div class="eyebrow">ตอนเรียน ${s.sec} · ห้อง ${s.room}</div><h1>${api.err ? "เชื่อมต่อระบบเช็คชื่อไม่ได้" : "กำลังเปิดเช็คชื่อ…"}</h1><div class="sub">${api.err ? "ตรวจการเชื่อมต่ออินเทอร์เน็ต ระบบจะลองใหม่อัตโนมัติ" : "กำลังสร้าง QR Code ประจำคาบ รอสักครู่"}</div>`
           : `<div class="eyebrow">กำลังเปิดเช็คชื่อ · ห้อง ${s.room}</div>
              <h1>ตอนเรียน ${s.sec}</h1>
-             <div class="sub">พฤหัสบดี ${s.start}–${s.end} น. · สแกนด้วยมือถือ แล้วลงชื่อเข้าใช้ด้วยบัญชีมหาวิทยาลัย</div>
+             <div class="sub">${DAYS[s.day]} ${s.start}–${s.end} น. · สแกนด้วยมือถือ แล้วลงชื่อเข้าใช้ด้วยบัญชีมหาวิทยาลัย</div>
              <div class="qr">${qrSvg(url)}</div>
              <div class="remain">ปิดรับในอีก <b id="left"></b></div>
              <div class="bar"><i id="bar"></i></div>
@@ -156,11 +162,11 @@
     card.className = "card closed";
     card.innerHTML = `
       <div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-      <div class="eyebrow">040223252 ทฤษฎีการคำนวณ</div>
+      <div class="eyebrow">${COURSE}</div>
       <h1>ไม่อยู่ในช่วงเวลาเรียน</h1>
       <div class="sub">QR Code สำหรับเช็คชื่อจะแสดงเฉพาะในช่วงเวลาเรียนเท่านั้น</div>
       ${n ? `<div class="next">คาบถัดไป: <b>ตอนเรียน ${n.s.sec}</b> · ${when} เวลา ${n.s.start}–${n.s.end} น. ห้อง ${n.s.room}</div>` : ""}
-      <div class="note">ตอนเรียน 1: พฤหัสบดี 09.00–12.00 น. · ตอนเรียน 2: พฤหัสบดี 13.00–16.00 น.</div>`;
+      <div class="note">${SCHEDULE}</div>`;
   }
   render();
   setInterval(render, 1000);

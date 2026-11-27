@@ -2,6 +2,9 @@
 // day: 0=อาทิตย์ 1=จันทร์ ... 4=พฤหัสบดี
 // apiUrl: Web app URL ของ Apps Script (ลงท้าย /exec) — หน้าเว็บขอลิงก์ QR ประจำคาบจากที่นี่ ได้เฉพาะในช่วงเวลาเรียน
 window.CHECKIN = {
+  courseCode: "040223252",
+  courseName: "ทฤษฎีการคำนวณ",
+  courseNameEn: "Theory of Computation",
   timeZone: "Asia/Bangkok",
   apiUrl: "https://script.google.com/macros/s/AKfycbzcguo7oLa1D7sUFHnnq-WGLqEYmqDepWlVbpQNSoW0DC592lwb6jzz0VepAJAkaFd0/exec",
   sections: [
